@@ -3,9 +3,7 @@ class CertificateAuthoritiesController < ApplicationController
   # Creates a new CA and saves it to the DB
   def create
     @ca = CertificateAuthority.new(certificate_authority_params)
-    ca_data = @ca.generate_ca_data!(params[:certificate_authority][:subject])
-    @ca.private_key = ca_data[:private_key]
-    @ca.ca_cert = ca_data[:ca_cert]
+    ca_data = @ca.generate_ca_data!
     if @ca.save
       # happy path
       # return the ca_cert itself with a 200

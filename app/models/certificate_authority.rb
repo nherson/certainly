@@ -5,7 +5,10 @@ class CertificateAuthority < ActiveRecord::Base
   validates :private_key, :presence => true
   validates :ca_cert, :presence => true
   validates :subject, :presence => true
+  validates :next_serial, :presence => true
   validate :key_matches_cert
+  # 'and_issuer' so long as external signers not supported
+  validate :subject_matches_cert_and_issuer
 
   serialize :ca_cert, CertificateSerializer
   serialize :private_key, PrivateKeySerializer
@@ -13,36 +16,38 @@ class CertificateAuthority < ActiveRecord::Base
   has_many :certificates
 
   # generate a key, self.ca_cert, etc
-  def generate_ca_data!(subject)
-    private_key = OpenSSL::PKey::RSA.new(2048)
+  def generate_ca_data!
+    self.private_key = OpenSSL::PKey::RSA.new(2048)
     public_key = private_key.public_key
 
-    ca_cert = OpenSSL::X509::Certificate.new
-    ca_cert.subject = ca_cert.issuer = OpenSSL::X509::Name.parse(subject)
-    ca_cert.not_before = Time.now
-    ca_cert.not_after = Time.now + 365 * 24 * 60 * 60 * 10 #TODO change from hardcoded 10 years
-    ca_cert.public_key = public_key
-    ca_cert.serial = 0x0
-    ca_cert.version = 2
+    self.ca_cert = OpenSSL::X509::Certificate.new
+    self.ca_cert.subject = self.ca_cert.issuer = OpenSSL::X509::Name.parse(self.subject) # self-signed
+    self.ca_cert.not_before = Time.now
+    self.ca_cert.not_after = Time.now + 365 * 24 * 60 * 60 * 10 #TODO change from hardcoded 10 years
+    self.ca_cert.public_key = public_key
+    self.ca_cert.serial = 0x0
+    self.ca_cert.version = 2
 
     ef = OpenSSL::X509::ExtensionFactory.new
     ef.subject_certificate = ca_cert
     ef.issuer_certificate = ca_cert
     # TODO Make this changeable
-    ca_cert.extensions = [
+    self.ca_cert.extensions = [
         ef.create_extension("basicConstraints","CA:TRUE", true),
         ef.create_extension("subjectKeyIdentifier", "hash"),
     ]
-    ca_cert.add_extension ef.create_extension("authorityKeyIdentifier", "keyid:always,issuer:always")
+    self.ca_cert.add_extension ef.create_extension("authorityKeyIdentifier", "keyid:always,issuer:always")
 
-    ca_cert.sign private_key, OpenSSL::Digest::SHA1.new
-
-    return {:private_key => private_key, :ca_cert => ca_cert}
+    self.ca_cert.sign private_key, OpenSSL::Digest::SHA1.new
   end
 
   def key_matches_cert
     privkey = OpenSSL::PKey::RSA.new(self.private_key)
     cert = OpenSSL::X509::Certificate.new(self.ca_cert)
     errors.add(:private_key, "Private key and CA certificate do not match") unless cert.check_private_key(privkey)
+  end
+
+  def subject_matches_cert_and_issuer
+    errors.add(:subject, "Subject does not match CA certificate subject") unless ca_cert.subject.to_s == subject
   end
 end
