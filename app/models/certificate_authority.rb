@@ -26,6 +26,7 @@ class CertificateAuthority < ActiveRecord::Base
     self.ca_cert.not_after = Time.now + 365 * 24 * 60 * 60 * 10 #TODO change from hardcoded 10 years
     self.ca_cert.public_key = public_key
     self.ca_cert.serial = 0x0
+    self.next_serial = 0x1
     self.ca_cert.version = 2
 
     ef = OpenSSL::X509::ExtensionFactory.new
