@@ -56,10 +56,12 @@ Rails.application.routes.draw do
   
   scope :api do
     scope :v1 do
-      resources :cas, :only => [:show, :create, :destroy], :controller => 'certificate_authorities'  do
+      get 'cas/:id/info', :to => 'certificate_authorities#info', :as => 'ca_info'
+      get 'cas/:id/data', :to => 'certificate_authorities#data', :as => 'ca_data'
+      resources :cas, :only => [ :create, :destroy], :controller => 'certificate_authorities'  do
         #resource :profile, :only => [:create, :show, :update, :destroy]
         resources :certs, :only => [:create, :show], :controller => 'certificates'
-        get 'certs/:id/revoke', :to => 'certs#revoke'
+        get 'certs/:id/revoke', :to => 'certificates#revoke'
         resource :crl, :only => [:create, :show]
         # get 'crl/publish', :to => 'crls#publish'
       end

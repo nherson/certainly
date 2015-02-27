@@ -43,12 +43,17 @@ class CertificateAuthority < ActiveRecord::Base
   end
 
   def key_matches_cert
-    privkey = OpenSSL::PKey::RSA.new(self.private_key)
-    cert = OpenSSL::X509::Certificate.new(self.ca_cert)
-    errors.add(:private_key, "Private key and CA certificate do not match") unless cert.check_private_key(privkey)
+    begin
+      errors.add(:private_key, "Private key and CA certificate do not match") unless ca_cert.check_private_key(private_key)
+    rescue
+      errors.add(:private_key, "Private key or CA certificate corrupt or missing")
+    end
   end
 
   def subject_matches_cert_and_issuer
-    errors.add(:subject, "Subject does not match CA certificate subject") unless ca_cert.subject.to_s == subject
+    begin
+      errors.add(:subject, "Subject does not match CA certificate subject") unless ca_cert.subject.to_s == subject
+    rescue
+    end
   end
 end

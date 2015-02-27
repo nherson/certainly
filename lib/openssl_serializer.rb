@@ -1,6 +1,6 @@
 class CertificateSerializer
   def self.load(pem)
-    OpenSSL::X509::Certificate.new(pem)
+    OpenSSL::X509::Certificate.new(pem) unless pem.nil?
   end
 
   def self.dump(cert)
@@ -10,7 +10,7 @@ end
 
 class PrivateKeySerializer
   def self.load(pem)
-    OpenSSL::PKey::RSA.new(pem)
+    OpenSSL::PKey::RSA.new(pem) unless pem.nil?
   end
 
   def self.dump(privkey)
