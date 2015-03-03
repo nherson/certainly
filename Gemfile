@@ -20,6 +20,11 @@ group :development,:test do
   gem 'simplecov'
 end
 
+group :test do
+  gem 'cucumber-rails', require: false
+end
+
+
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
