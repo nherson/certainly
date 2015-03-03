@@ -42,6 +42,11 @@ class CertificateAuthority < ActiveRecord::Base
     self.ca_cert.sign private_key, OpenSSL::Digest::SHA1.new
   end
 
+  # Given a CSR, hands back a certificate signed by this CA
+  def sign(csr)
+
+  end
+
   def key_matches_cert
     begin
       errors.add(:private_key, "Private key and CA certificate do not match") unless ca_cert.check_private_key(private_key)

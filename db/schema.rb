@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150225192720) do
+ActiveRecord::Schema.define(version: 20150303013457) do
 
   create_table "certificate_authorities", force: true do |t|
     t.string   "name"
@@ -22,5 +22,15 @@ ActiveRecord::Schema.define(version: 20150225192720) do
     t.datetime "updated_at"
     t.integer  "next_serial"
   end
+
+  create_table "certificates", force: true do |t|
+    t.text     "cert"
+    t.integer  "serial"
+    t.integer  "certificate_authority_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "certificates", ["certificate_authority_id", "serial"], name: "index_certificates_on_certificate_authority_id_and_serial", unique: true
 
 end

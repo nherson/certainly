@@ -60,8 +60,8 @@ Rails.application.routes.draw do
       get 'cas/:id/ca_cert', :to => 'certificate_authorities#ca_cert', :as => 'ca_cert'
       resources :cas, :only => [ :create, :destroy], :controller => 'certificate_authorities'  do
         #resource :profile, :only => [:create, :show, :update, :destroy]
-        resources :certs, :only => [:create, :show], :controller => 'certificates'
-        get 'certs/:id/revoke', :to => 'certificates#revoke'
+        resources :certs, :only => [:create, :show], :controller => 'certificates', as: 'certificates'
+        put 'certs/:id/revoke', :to => 'certificates#revoke', as: 'revoke_certificate'
         resource :crl, :only => [:create, :show]
         # get 'crl/publish', :to => 'crls#publish'
       end
