@@ -43,9 +43,28 @@ class CertificateAuthority < ActiveRecord::Base
   end
 
   # Given a CSR, hands back a certificate signed by this CA
-  def sign(csr)
-
+  # also bumps the serial number on this CA
+  def sign!(cert)
+    openssl_cert = cert.cert # because model -> OpenSSL object
+    openssl_cert.serial = self.next_serial
+    cert.serial = self.next_serial
+    openssl_cert.issuer = ca_cert.subject
+    openssl_cert.sign private_key, OpenSSL::Digest::SHA1.new
+    self.next_serial = self.next_serial + 1
+    self.save
+    nil
   end
+
+  # Merges CA profile and CSR requested fields onto a new, unsigned Certificate object
+  def prepare_certificate(csr)
+    cert = OpenSSL::X509::Certificate.new
+    cert.subject = csr.subject
+    cert.public_key = csr.public_key
+    cert
+  end
+
+
+  # VALIDATIONS
 
   def key_matches_cert
     begin

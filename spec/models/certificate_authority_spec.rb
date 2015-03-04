@@ -32,4 +32,24 @@ RSpec.describe CertificateAuthority, type: :model do
       expect{ @ca.save! }.to raise_error(ActiveRecord::RecordInvalid)
     end
   end
+
+  describe "#sign!" do
+    before :each do
+      @ca = FactoryGirl.create(:certificate_authority)
+      @cert = FactoryGirl.build(:certificate)
+    end
+    it "should return nil (modifies underlying cert)" do
+      expect(@ca.sign!(@cert)).to eq(nil)
+    end
+    it "should bump CA's next serial" do
+      serial = @ca.next_serial
+      @ca.sign! @cert
+      expect(@cert.serial).to eq(serial)
+      expect(@ca.next_serial).to eq(serial+1)
+    end
+    it "should cause the signed cert's issuer to be this CA" do
+      @ca.sign! @cert
+      expect(@cert.cert.issuer.to_s).to eq(@ca.subject)
+    end
+  end
 end

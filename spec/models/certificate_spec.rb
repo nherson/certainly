@@ -6,12 +6,12 @@ RSpec.describe Certificate, type: :model do
       @cert = FactoryGirl.build(:certificate)
     end
     it "is valid when signed by parent CA" do
-      @cert.certificate_authority.sign(@cert)
+      @cert.cert.sign(@cert.certificate_authority.private_key, OpenSSL::Digest::SHA1.new)
       expect(@cert.valid?).to eq(true)
     end
     it "is invalid when not signed by parent CA" do
       @other_ca = FactoryGirl.create(:certificate_authority)
-      @other_ca.sign(@cert)
+      @cert.cert.sign(@other_ca.private_key, OpenSSL::Digest::SHA1.new)
       expect(@cert.valid?).to eq(false)
     end
     it "is invalid when not signed at all" do

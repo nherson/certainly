@@ -7,14 +7,18 @@ class Certificate < ActiveRecord::Base
   validate :signed
   validate :serial_matches_cert
 
-  serialize :pem, CertificateSerializer
+  serialize :cert, CertificateSerializer
 
   def signed
-
+    if not cert.verify(certificate_authority.ca_cert.public_key)
+      errors.add(:cert, "Certificate is not signed by indicated parent CA")
+    end
   end
 
   def serial_matches_cert
-
+    if not serial == cert.serial
+      errors.add(:cert, "Serial in Certificate model does not match certificate data")
+    end
   end
 
 end
