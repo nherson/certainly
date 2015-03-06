@@ -62,9 +62,11 @@ Rails.application.routes.draw do
         #resource :profile, :only => [:create, :show, :update, :destroy]
         resources :certs, :only => [:create, :show], :controller => 'certificates', as: 'certificates'
         put 'certs/:id/revoke', :to => 'certificates#revoke', as: 'revoke_certificate'
+        get 'certs/:id/pem', to: 'certificates#pem', as: 'pem_certificate'
         resource :crl, :only => [:create, :show]
         # get 'crl/publish', :to => 'crls#publish'
       end
     end
   end
+
 end

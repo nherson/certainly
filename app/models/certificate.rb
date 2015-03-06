@@ -21,4 +21,24 @@ class Certificate < ActiveRecord::Base
     end
   end
 
+  def not_before
+    return cert.not_before
+  end
+
+  def not_after
+    return cert.not_after
+  end
+
+  def subject
+    return cert.subject
+  end
+
+  def pem
+    return cert.to_pem
+  end
+
+  def der
+    return cert.to_der
+  end
+
 end

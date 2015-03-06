@@ -14,7 +14,7 @@ FactoryGirl.define do
     end
     # sign before saving to db
     before(:create) do |c|
-      c.pem = cert.sign(c.certificate_authority.private_key, OpenSSL::Digest::SHA1.new).to_pem
+      c.certificate_authority.sign!(c)
     end
   end
 
