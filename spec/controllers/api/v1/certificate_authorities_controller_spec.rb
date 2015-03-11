@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'json'
 
-RSpec.describe CertificateAuthoritiesController, type: :controller do
+RSpec.describe Api::V1::CertificateAuthoritiesController, type: :controller do
 
   describe "#create" do
     it "responds with success when given name and subject" do

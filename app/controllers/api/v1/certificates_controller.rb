@@ -1,4 +1,4 @@
-class CertificatesController < ApplicationController
+class Api::V1::CertificatesController < ApplicationController
   def show
     certificate_not_found and return unless cert
     resp = { subject: @cert.subject,

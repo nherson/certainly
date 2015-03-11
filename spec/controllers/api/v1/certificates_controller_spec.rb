@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe CertificatesController, type: :controller do
+RSpec.describe Api::V1::CertificatesController, type: :controller do
 
   describe "#show" do
     context 'the certificate exists' do

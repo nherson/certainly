@@ -1,4 +1,4 @@
-class CertificateAuthoritiesController < ApplicationController
+class Api::V1::CertificateAuthoritiesController < ApplicationController
 
   # Creates a new CA and saves it to the DB
   def create

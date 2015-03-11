@@ -56,13 +56,13 @@ Rails.application.routes.draw do
   
   scope :api do
     scope :v1 do
-      get 'cas/:id/info', :to => 'certificate_authorities#info', :as => 'ca_info'
-      get 'cas/:id/ca_cert', :to => 'certificate_authorities#ca_cert', :as => 'ca_cert'
-      resources :cas, :only => [ :create, :destroy], :controller => 'certificate_authorities'  do
+      get 'cas/:id/info', :to => 'api/v1/certificate_authorities#info', :as => 'ca_info'
+      get 'cas/:id/ca_cert', :to => 'api/v1/certificate_authorities#ca_cert', :as => 'ca_cert'
+      resources :cas, :only => [ :create, :destroy], :controller => 'api/v1/certificate_authorities'  do
         #resource :profile, :only => [:create, :show, :update, :destroy]
-        resources :certs, :only => [:create, :show], :controller => 'certificates', as: 'certificates'
-        put 'certs/:id/revoke', :to => 'certificates#revoke', as: 'revoke_certificate'
-        get 'certs/:id/pem', to: 'certificates#pem', as: 'pem_certificate'
+        resources :certs, :only => [:create, :show], :controller => 'api/v1/certificates', as: 'certificates'
+        put 'certs/:id/revoke', :to => 'api/v1/certificates#revoke', as: 'api/v1/revoke_certificate'
+        get 'certs/:id/pem', to: 'api/v1/certificates#pem', as: 'pem_certificate'
         resource :crl, :only => [:create, :show]
         # get 'crl/publish', :to => 'crls#publish'
       end
