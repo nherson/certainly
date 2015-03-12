@@ -17,3 +17,12 @@ class PrivateKeySerializer
     privkey.to_pem
   end
 end
+
+class SubjectSerializer
+  def self.load(str)
+    OpenSSL::X509::Name.parse(str)
+  end
+  def self.dump(name)
+    name.to_s
+  end
+end

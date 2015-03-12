@@ -49,7 +49,39 @@ RSpec.describe CertificateAuthority, type: :model do
     end
     it "should cause the signed cert's issuer to be this CA" do
       @ca.sign! @cert
-      expect(@cert.cert.issuer.to_s).to eq(@ca.subject)
+      expect(@cert.cert.issuer).to eq(@ca.subject)
     end
   end
+
+  describe "certificate helper methods" do
+    before :each do
+      @ca = FactoryGirl.create(:certificate_authority)
+    end
+    describe "#to_pem" do
+      it "should return the certificate as a PEM string" do
+        expect(@ca.to_pem).to eq(@ca.ca_cert.to_pem)
+      end
+    end
+    describe "#to_der" do
+      it "should return the certificate with DER encoding" do
+        expect(@ca.to_der).to eq(@ca.ca_cert.to_der)
+      end
+    end
+    describe "#not_before" do
+      it "should return the start date of the CA's validity" do
+        expect(@ca.not_before).to eq(@ca.ca_cert.not_before)
+      end
+    end
+    describe "#not_after" do
+      it "should return the end date of the CA's validity" do
+        expect(@ca.not_after).to eq(@ca.ca_cert.not_after)
+      end
+    end
+    describe "#subject" do
+      it "should return the subject of the CA" do
+        expect(@ca.subject).to eq(@ca.ca_cert.subject)
+      end
+    end
+  end
+
 end

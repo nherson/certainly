@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Api::V1::CertificatesController, type: :controller do
 
-  describe "#show" do
+  describe "#info" do
     context 'the certificate exists' do
       before :each do
         @cert = double("Certificate")
@@ -12,94 +12,77 @@ RSpec.describe Api::V1::CertificatesController, type: :controller do
         allow(Certificate).to receive(:find) { @cert }
       end
       it 'returns JSON information about the certificate' do
-        get :show, ca_id: 1, id: 1 
+        get :info, ca_id: 1, id: 1 
         h = JSON.parse(response.body)
         expect(h["subject"]).to eq(@cert.subject)
         expect(h["not_before"]).to eq(@cert.not_before.to_s)
         expect(h["not_after"]).to eq(@cert.not_after.to_s)
       end
       it 'responds with 200 status' do
-        get :show, ca_id: 1, id: 1 
+        get :info, ca_id: 1, id: 1 
         expect(response.response_code).to eq(200)
       end
     end
     context 'the certificate does not exist' do
       it "returns JSON with an 'error' key" do
-        get :show, ca_id: 777, id: 666
+        get :info, ca_id: 777, id: 666
         h = JSON.parse(response.body)
-        expect(h["error"]).to eq("certificate not found")
+        expect(h["errors"]).to eq(["certificate not found"])
       end
       it "responds with 404 status" do
-        get :show, ca_id: 777, id: 666
+        get :info, ca_id: 777, id: 666
         expect(response.response_code).to eq(404)
       end
     end
   end
 
   describe '#pem' do
-    context 'the certificate exists' do
-      before :each do
-        @cert = FactoryGirl.create(:certificate)
-      end
-      context 'the requestor does not specify a format (default to PEM)' do
-        before :each do
-          get :pem, ca_id: @cert.certificate_authority_id, id: @cert.id
-        end
-        it 'returns PEM format' do
-          expect(response.body).to eq(@cert.pem)
-        end
-        it 'responds with 200 status' do
-          expect(response.response_code).to eq(200)
-        end
-      end
-      context 'the requestor specifies PEM format' do
-        before :each do
-          get :pem, ca_id: @cert.certificate_authority_id, id: @cert.id, format: 'pem'
-        end
-        it 'returns PEM format' do
-          expect(response.body).to eq(@cert.pem)
-        end
-        it 'responds with 200 status' do
-          expect(response.response_code).to eq(200)
-        end
-      end
-      context 'the requestor specifies DER format' do
-        before :each do
-          get :pem, ca_id: @cert.certificate_authority_id, id: @cert.id, format: 'DER' #uppercase to make sure the controller downcases
-        end
-        it 'returns DER format' do
-          expect(response.body).to eq(@cert.der)
-        end
-        it 'responds with 200 status' do
-          expect(response.response_code).to eq(200)
-        end
-      end
-      context 'the requestor specifies an unknown format' do
-        before :each do
-          get :pem, ca_id: @cert.certificate_authority_id, id: @cert.id, format: 'weird format'
-        end
-        it 'returns an error' do
-          expect(JSON.parse(response.body)["error"]).to eq("unknown format specified: weird format")
-        end
-        it 'responds with 400 status' do
-          expect(response.response_code).to eq(400)
-        end
-      end
+    before :each do
+      @cert = FactoryGirl.create(:certificate)
     end
-    context 'the certificate does not exist' do
-      it 'returns an error message' do
-        get :pem, ca_id: 777, id: 666
-        h = JSON.parse(response.body)
-        expect(h["error"]).to eq("certificate not found")
-      end
-      it 'responds with 404 status' do
-        get :pem, ca_id: 777, id: 666
-        expect(response.response_code).to eq(404)
-      end
+    it "returns the PEM of the certificate" do
+      get :pem, ca_id: @cert.certificate_authority_id, id: @cert.id
+      expect(response.body).to eq(@cert.to_pem)
+    end
+    it "returns with a 200 status code" do
+      get :pem, ca_id: @cert.certificate_authority_id, id: @cert.id
+      expect(response.response_code).to eq(200)
+    end
+    it "contains the proper MIME type" do
+      get :pem, ca_id: @cert.certificate_authority_id, id: @cert.id
+      expect(response.content_type).to eq('application/x-pem-file')
+    end
+    it "returns a json formatted error when the certificate does not exist" do
+      get :pem, ca_id: 777, id: 666
+      expect(response.response_code).to eq(404)
+      expect(JSON.parse(response.body)["errors"]).to eq(["certificate not found"])
     end
   end
 
-  describe '#create', pending: true do
-    
+  describe '#der' do
+    before :each do
+      @cert = FactoryGirl.create(:certificate)
+    end
+    it "returns the DER of the certificate" do
+      get :der, ca_id: @cert.certificate_authority_id, id: @cert.id
+      expect(response.body).to eq(@cert.to_der)
+    end
+    it "returns with a 200 status code" do
+      get :der, ca_id: @cert.certificate_authority_id, id: @cert.id
+      expect(response.response_code).to eq(200)
+    end
+    it "contains the proper MIME type" do
+      get :der, ca_id: @cert.certificate_authority_id, id: @cert.id
+      expect(response.content_type).to eq('application/x-x509-ca-cert')
+    end
+    it "returns a json formatted error when the certificate does not exist" do
+      get :der, ca_id: 777, id: 666
+      expect(response.response_code).to eq(404)
+      expect(JSON.parse(response.body)["errors"]).to eq(["certificate not found"])
+    end
   end
+    
+  describe '#create', pending: true do
+  end
+   
 end

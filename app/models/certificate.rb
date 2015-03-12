@@ -33,11 +33,11 @@ class Certificate < ActiveRecord::Base
     return cert.subject
   end
 
-  def pem
+  def to_pem
     return cert.to_pem
   end
 
-  def der
+  def to_der
     return cert.to_der
   end
 

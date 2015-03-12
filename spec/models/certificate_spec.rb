@@ -43,14 +43,14 @@ RSpec.describe Certificate, type: :model do
   describe 'pem conversion' do
     it 'returns a long pem string matching the underlying certificate' do
       @cert = FactoryGirl.create(:certificate)
-      expect(@cert.pem).to eq(@cert.cert.to_pem)
+      expect(@cert.to_pem).to eq(@cert.cert.to_pem)
     end
   end
 
   describe 'der conversion' do
     it 'returns a der encoding matching the underlying certifcate' do
       @cert = FactoryGirl.create(:certificate)
-      expect(@cert.der).to eq(@cert.cert.to_der)
+      expect(@cert.to_der).to eq(@cert.cert.to_der)
     end
   end
 end

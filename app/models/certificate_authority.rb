@@ -12,6 +12,7 @@ class CertificateAuthority < ActiveRecord::Base
 
   serialize :ca_cert, CertificateSerializer
   serialize :private_key, PrivateKeySerializer
+  serialize :subject, SubjectSerializer
 
   has_many :certificates
 
@@ -21,7 +22,7 @@ class CertificateAuthority < ActiveRecord::Base
     public_key = private_key.public_key
 
     self.ca_cert = OpenSSL::X509::Certificate.new
-    self.ca_cert.subject = self.ca_cert.issuer = OpenSSL::X509::Name.parse(self.subject) # self-signed
+    self.ca_cert.subject = self.ca_cert.issuer = self.subject # self-signed
     self.ca_cert.not_before = Time.now
     self.ca_cert.not_after = Time.now + 365 * 24 * 60 * 60 * 10 #TODO change from hardcoded 10 years
     self.ca_cert.public_key = public_key
@@ -63,6 +64,22 @@ class CertificateAuthority < ActiveRecord::Base
     cert
   end
 
+  # Helper methods that let you avoid statements like @ca.ca_cert.to_pem
+  def to_pem
+    ca_cert.to_pem
+  end
+
+  def to_der
+    ca_cert.to_der
+  end
+
+  def not_before
+    ca_cert.not_before
+  end
+
+  def not_after
+    ca_cert.not_after
+  end
 
   # VALIDATIONS
 
@@ -76,7 +93,7 @@ class CertificateAuthority < ActiveRecord::Base
 
   def subject_matches_cert_and_issuer
     begin
-      errors.add(:subject, "Subject does not match CA certificate subject") unless ca_cert.subject.to_s == subject
+      errors.add(:subject, "Subject does not match CA certificate subject") unless ca_cert.subject == subject
     rescue
     end
   end

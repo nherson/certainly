@@ -1,45 +1,33 @@
+# Controller for actions relating to the Certificate model
 class Api::V1::CertificatesController < ApplicationController
-  def show
-    certificate_not_found and return unless cert
+  before_action :load_cert, only: [:info, :pem, :der]
+
+  # Should return as much info about the cert as possible
+  def info
     resp = { subject: @cert.subject,
              not_before: @cert.not_before.to_s,
              not_after: @cert.not_after.to_s }
-    render :json => resp
+    render json: resp
   end
 
   def pem
-    certificate_not_found and return unless cert
-    unknown_format and return unless valid_format
-    render plain: @data, content_type: @content_type
+    render body: @cert.to_pem, content_type: pem_mime
+  end
+
+  def der
+    render body: @cert.to_der, content_type: der_mime
   end
 
   private
 
-  def valid_format
-    format = params[:format] || "pem"
-    case format.downcase
-    when "pem"
-      @data = @cert.pem
-      @content_type = "application/x-pem-file"
-    when "der"
-      @data = @cert.der
-      @content_type = "application/x-x509-ca-cert"
-    end
-  end
-
-  def unknown_format
-    render json: {:error => "unknown format specified: #{params[:format]}"}, status: 400
-  end
-
-  def cert
+  def load_cert
     begin
       @cert ||= Certificate.find(params[:id])
+      true
     rescue
-      nil
+      render json: {errors: ["certificate not found"]}, status: 404
+      false
     end
   end
 
-  def certificate_not_found
-    render :json => {:error => "certificate not found"}, :status => 404
-  end
 end
