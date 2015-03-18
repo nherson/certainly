@@ -1,5 +1,5 @@
 # Controller for actions relating to the Certificate model
-class Api::V1::CertificatesController < ApplicationController
+class Api::V1::CertificatesController < ApiController
   before_action :load_cert, only: [:info, :pem, :der]
 
   # Should return as much info about the cert as possible

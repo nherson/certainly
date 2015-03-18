@@ -1,5 +1,5 @@
 # Receives actions pertaining to the CertificateAuthority model
-class Api::V1::CertificateAuthoritiesController < ApplicationController
+class Api::V1::CertificateAuthoritiesController < ApiController
 
   before_action :load_ca, only: [:pem, :der, :info, :destroy]
 
